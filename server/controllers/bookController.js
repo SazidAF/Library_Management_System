@@ -22,13 +22,13 @@ export const addBooks = async (req, res) => {
     // add book to database
     try {
         const {...book } = req.body;
-        await client.query('BEGIN')
-        const queryText = 'INSERT INTO books(name, author, genre) VALUES($1, $2, $3) RETURNING id, name, author';
-        const result = await client.query(queryText, [book.name, book.author, book.genre]);
-        await client.query('COMMIT');
+        await client.query('begin')
+        const querytext = 'insert into books(name, author, genre) values($1, $2, $3) returning id, name, author';
+        const result = await client.query(querytext, [book.name, book.author, book.genre]);
+        await client.query('commit');
         res.status(201).json(result.rows);
     } catch (error) {
-        await client.query('ROLLBACK');
+        await client.query('rollback');
         throw error;
     }
 };
@@ -76,3 +76,28 @@ export const updateBook = async (req, res) => {
     }
 };
 
+export const borrowBook = async (req, res) => {
+    // add book to database
+    try {
+        const id = req.params.id;
+        const {user_id} = req.body;
+        await client.query('BEGIN')
+        const existingBook = await client.query('SELECT id, stock FROM books WHERE id = $1', [id]);
+        if (!existingBook.rows[0]) {
+            return res.status(404).json({ message: "Book Does not Exist"});
+        }
+        // console.log(existingBook.rows[0])
+        if (existingBook.rows[0].stock == 0) {
+            return res.status(400).json({ message: "Book is out of stock"});
+        }
+        const querytext = 'INSERT INTO borrow(book_id, user_id) VALUES ($1, $2) RETURNING user_id, book_id, issued_at, due_at';
+        const result = await client.query(querytext, [id, user_id]);
+        const updateStock = 'UPDATE books SET stock = stock - 1 WHERE id = $1';
+        await client.query(updateStock, [id]);
+        await client.query('COMMIT');
+        res.status(201).json(result.rows);
+    } catch (error) {
+        await client.query('ROLLBACK');
+        throw error;
+    }
+};
