@@ -3,7 +3,7 @@ create table books (
 	name VARCHAR(50) NOT NULL,
 	genre VARCHAR(50) NOT NULL,
 	author VARCHAR(50) NOT NULL,
-	stock INT NOT NULL
+	stock INT NOT NULL DEFAULT 1
 );
 insert into books (name, genre, author, stock) values ('Me and Morrison (Minä ja Morrison)', 'Romance', 'Laurena Pol', 26);
 insert into books (name, genre, author, stock) values ('Ultramarines: A Warhammer 40,000 Movie', 'Animation|Sci-Fi', 'Raphael Piscot', 19);
