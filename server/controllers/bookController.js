@@ -1,4 +1,3 @@
-import { response } from 'express';
 import pool from '../utils/db.js';
 
 const client = await pool.connect();
@@ -66,8 +65,9 @@ export const updateBook = async (req, res) => {
         if (!existingBook) {
             return res.status(404).json({ message: "Book Does not Exist"});
         }
-        const queryText = 'UPDATE books FROM SET name = $1, author = $2, genre = $3 RETURNING id, name, author, genre';
-        const result = await client.query(queryText, [book.name, book.author, book.genre]);
+        const queryText = 'UPDATE books SET name = $1, author = $2, genre = $3 WHERE id = $4 RETURNING id, name, author, genre';
+        const result = await client.query(queryText, [book.name, book.author, book.genre, id]);
+        // console.log(result);
         await client.query('COMMIT');
         res.status(200).json(result.rows);
     } catch (error) {

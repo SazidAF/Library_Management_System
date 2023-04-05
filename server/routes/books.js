@@ -7,6 +7,6 @@ router.get("/", getBooks);
 router.post("/", addBooks);
 router.get("/:id", getBook);
 router.delete("/:id", deleteBook);
-router.patch("/update/:id", updateBook);
+router.patch("/:id", updateBook);
 
 export default router;
