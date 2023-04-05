@@ -6,7 +6,7 @@ import { getBooks, getBook, addBooks, deleteBook, updateBook } from "../controll
 router.get("/", getBooks);
 router.post("/", addBooks);
 router.get("/:id", getBook);
-router.delete("/delete/:id", deleteBook);
+router.delete("/:id", deleteBook);
 router.patch("/update/:id", updateBook);
 
 export default router;
