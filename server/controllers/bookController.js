@@ -34,13 +34,13 @@ export const addBooks = async (req, res) => {
 };
 
 export const deleteBook = async (req, res) => {
-  // add book to database
+  // delete book from database
     try {
         const id = req.params.id;
         // console.log(id);
         await client.query('BEGIN')
         const existingBook = await client.query('SELECT id FROM books WHERE id = $1', [id]);
-        if (!existingBook) {
+        if (!existingBook.rows[0]) {
             return res.status(404).json({ message: "Book Does not Exist"});
         }
         const queryText = 'DELETE FROM books WHERE id = $1 RETURNING id, name, author';
@@ -94,6 +94,33 @@ export const borrowBook = async (req, res) => {
         const result = await client.query(querytext, [id, user_id]);
         const updateStock = 'UPDATE books SET stock = stock - 1 WHERE id = $1';
         await client.query(updateStock, [id]);
+        await client.query('COMMIT');
+        res.status(201).json(result.rows);
+    } catch (error) {
+        await client.query('ROLLBACK');
+        throw error;
+    }
+};
+
+
+
+export const returnBook = async (req, res) => {
+    // return book to database
+    try {
+        const id = req.params.id;
+        const {user_id} = req.body;
+        await client.query('BEGIN')
+        const existingBook = await client.query('SELECT id, stock FROM books WHERE id = $1', [id]);
+        if (!existingBook.rows[0]) {
+            return res.status(404).json({ message: "Book Does not Exist"});
+        }
+        // console.log(existingBook.rows[0])
+        const updateStock = 'UPDATE books SET stock = stock + 1 WHERE id = $1';
+        await client.query(updateStock, [id]);
+
+        const deleteBorrow = 'DELETE FROM borrow WHERE book_id = $1 AND user_id = $2';
+        await client.query(deleteBorrow, [id, user_id]);
+
         await client.query('COMMIT');
         res.status(201).json(result.rows);
     } catch (error) {
