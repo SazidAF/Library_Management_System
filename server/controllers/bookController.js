@@ -118,9 +118,6 @@ export const returnBook = async (req, res) => {
         const updateStock = 'UPDATE books SET stock = stock + 1 WHERE id = $1';
         await client.query(updateStock, [id]);
 
-        const deleteBorrow = 'DELETE FROM borrow WHERE book_id = $1 AND user_id = $2';
-        await client.query(deleteBorrow, [id, user_id]);
-
         await client.query('COMMIT');
         res.status(201).json(result.rows);
     } catch (error) {
